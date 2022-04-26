@@ -41,15 +41,16 @@ class LevelManager:
         self.levels.append(L2)
 
         # Level 3
-        L3 = Level(10)
+        L3 = Level(8)
         L3.addGround(Ground(900, 120, -20, 340, "Images/Ground.png"))
         L3.addGround(Ground(100, 20, 200, 200, "Images/Ground.png"))
         L3.addGround(Ground(120, 20, 300, 120, "Images/Ground.png"))
         L3.addGround(Ground(80, 20, 400, 200, "Images/Ground.png"))
+        L3.generationGap = 1500
         self.levels.append(L3)
 
         # Level 4
-        L4 = Level(1)
+        L4 = Level(45)
         L4.addGround(Ground(900, 120, -20, 340, "Images/Ground.png"))
         L4.addGround(Ground(100, 20, 200, 200, "Images/Ground.png"))
         L4.addGround(Ground(120, 20, 300, 120, "Images/Ground.png"))

@@ -210,10 +210,20 @@ class Player(pygame.sprite.Sprite):
 
     def fireball(self, group):
         if self.mana >= 10:
-            for i in range(self.skillPowerLvl):
-                fireball = Fireball(self.direction, [self.rect.center[0] + i * 10, self.rect.center[1]])
-                group.add(fireball)
+            if self.skillPowerLvl > 6:
+                for i in range(int(self.skillPowerLvl/2)):
+                    fireball = Fireball("LEFT", [self.rect.center[0] + i * 10, self.rect.center[1]])
+                    group.add(fireball)
                 self.musicManager.loadSound("fireball", 0.4)
+                for i in range(int(self.skillPowerLvl/2)):
+                    fireball = Fireball("RIGHT", [self.rect.center[0] + i * 10, self.rect.center[1]])
+                    group.add(fireball)
+                self.musicManager.loadSound("fireball", 0.4)
+            else:
+                for i in range(self.skillPowerLvl):  # "LEFT"
+                    fireball = Fireball(self.direction, [self.rect.center[0] + i * 10, self.rect.center[1]])
+                    group.add(fireball)
+                    self.musicManager.loadSound("fireball", 0.4)
             self.mana -= 10
 
     def useManaPotion(self):
