@@ -19,7 +19,7 @@ class LevelManager:
         L0 = Level()
         L0.addBackGround("Images/ControlGuide.png")
         L0.addGround(Ground(900, 120, -20, 340, "Images/Ground.png"))
-        L0.addBuilding(Building(50, 200, "Images/Building04.png"))
+        L0.addBuilding(Building(50, 200, "Images/Building044.png"))
         self.levels.append(L0)
 
 
