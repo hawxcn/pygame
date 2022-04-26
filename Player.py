@@ -78,6 +78,7 @@ class Player(pygame.sprite.Sprite):
 
     def changeLevel(self,n):
         self.healthBar.reset()
+        self.mana = 50
         self.levelManager.changeLevel(n)
 
     def walking(self):
