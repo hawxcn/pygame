@@ -20,6 +20,7 @@ class Item(pygame.sprite.Sprite):
         if hits:
             if self.ID == 0:
                 player.coins += 1
+                player.lvlUp()
             elif self.ID == 1:
                 player.healthBar.Heal(1)
             elif self.ID == 2:

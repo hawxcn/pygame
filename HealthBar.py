@@ -4,16 +4,16 @@ vec = pygame.math.Vector2
 
 
 class HealthBar(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y,player):
         super().__init__()
         self.load_animations()
-
-        self.health = 5
+        self.player = player
+        self.health = player.maxHealth
         self.image = self.health_animations[self.health]
         self.pos = vec(x, y)
 
     def reset(self):
-        self.health = 5
+        self.health = self.player.maxHealth
         self.image = self.health_animations[self.health]
 
     def render(self, display):

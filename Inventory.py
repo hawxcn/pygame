@@ -11,7 +11,7 @@ class Inventory:
 
         self.playerInfo = player
 
-        self.slots.append(InventorySlot("Images/coinIcon.png", (10, 360)))
+        self.slots.append(InventorySlot("Images/Experience-Points-XP-icon.png", (10, 360)))
         self.slots.append(InventorySlot("Images/manapotionIcon.png", (110, 360)))
 
     def update(self):

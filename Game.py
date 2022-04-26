@@ -77,6 +77,8 @@ while 1:
                 levelManager.changeLevel(2)
             if event.key == K_4:
                 levelManager.changeLevel(3)
+            if event.key == K_5:
+                    levelManager.changeLevel(4)
             if event.key == K_h:
                 UI.toggleInventory()
             if event.key == K_m:
@@ -95,7 +97,7 @@ while 1:
     player.update(levelManager.levels[levelManager.getLevel()].groundData, EnemyProjectiles)
     UI.update(CLOCK.get_fps())
 
-    levelManager.update()
+    levelManager.update(Items)
 
     # Render Functions
     newBg = levelManager.levels[levelManager.getLevel()].backgroundData

@@ -8,6 +8,7 @@ class Level:
         self.groundData = pygame.sprite.Group()
         self.buildingData = pygame.sprite.Group()
         self.enemyCount = enemyCount
+        self.generationGap = 2000
 
     def add(self, data):
         self.data.append(data)

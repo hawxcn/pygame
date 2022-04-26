@@ -1,7 +1,12 @@
+import time
+
 import pygame
 from pygame.locals import *
 from HealthBar import HealthBar
 from Fireball import Fireball
+import random
+import xml.dom.minidom
+import os
 
 vec = pygame.math.Vector2
 
@@ -14,15 +19,35 @@ class Player(pygame.sprite.Sprite):
         self.levelManager = levelManager
         self.musicManager = levelManager.musicManager
 
+        if os.path.exists("save.xml"):
+            with xml.dom.minidom.parse("save.xml") as domTree:
+                player = domTree.getElementsByTagName("player")[0]
+                self.maxMana = int(player.getAttribute("maxMana"))
+                self.maxManaPotions = int(player.getAttribute("maxManaPotions"))
+                self.skillPowerLvl = int(player.getAttribute("skillPowerLvl"))
+                self.maxHealth = int(player.getAttribute("maxHealth"))
+                self.coins = int(player.getAttribute("coins"))
+        else:
+            self.maxMana = 100
+            self.maxManaPotions = 3
+            self.skillPowerLvl = 1
+            self.maxHealth = 5
+            self.coins = 0
+
+        # tolerance
+        self.hpT = 1
+        self.manaT = 10
+        self.mpT = 1
+        self.spT = 1
+
         # Player Info
         self.pos = vec(x, y)
         self.acc = vec(0, 0)
         self.vel = vec(0, 0)
-        self.healthBar = HealthBar(10, 10)
-        self.mana = 50
-        self.maxMana = 100
-        self.coins = 20
-        self.manaPotions = 3
+        self.healthBar = HealthBar(10, 10, self)
+
+        self.mana = self.maxMana
+        self.manaPotions = self.maxManaPotions
 
         # Player Constants
         self.ACC = 0.4
@@ -43,6 +68,40 @@ class Player(pygame.sprite.Sprite):
 
         # Player Events
         self.hit_cooldown_event = pygame.USEREVENT + 1
+
+    def lvlUp(self):
+        r = random.randint(0, 100)
+        if r < 30:
+            print("add hp")
+            # self.maxHealth += self.hpT
+            # self.healthBar.reset()
+        elif r < 60:
+            self.maxMana += self.manaT
+            self.mana = self.maxMana
+        elif r < 90:
+            self.maxManaPotions += self.mpT
+            self.manaPotions = self.maxManaPotions
+        else:
+            self.skillPowerLvl += self.spT
+
+        self.save()
+        return
+
+    def save(self):
+        doc = xml.dom.minidom.Document()
+        root = doc.createElement("games")
+        player = doc.createElement("player")
+        player.setAttribute("maxHealth", str(self.maxHealth))
+        player.setAttribute("maxMana", str(self.maxMana))
+        player.setAttribute("maxManaPotions", str(self.maxManaPotions))
+        player.setAttribute("skillPowerLvl", str(self.skillPowerLvl))
+        player.setAttribute("coins", str(self.coins))
+        root.appendChild(player)
+        doc.appendChild(root)
+
+        with open('save.xml', 'w') as f:
+            # 缩进 - 换行 - 编码
+            doc.writexml(f, encoding="utf-8")
 
     def move(self):
         self.acc = vec(0, 0.5)
@@ -76,9 +135,10 @@ class Player(pygame.sprite.Sprite):
         self.rect.topleft = self.pos
         self.rect.x += 32
 
-    def changeLevel(self,n):
+    def changeLevel(self, n):
         self.healthBar.reset()
-        self.mana = 50
+        self.mana = self.maxMana
+        self.manaPotions = self.maxManaPotions
         self.levelManager.changeLevel(n)
 
     def walking(self):
@@ -144,16 +204,17 @@ class Player(pygame.sprite.Sprite):
         if self.hit_cooldown == False:
             self.hit_cooldown = True
             self.healthBar.takeDamage(damage)
-            if(self.healthBar.health <=0):
+            if (self.healthBar.health <= 0):
                 self.changeLevel(1)
             pygame.time.set_timer(self.hit_cooldown_event, 1000)
 
     def fireball(self, group):
         if self.mana >= 10:
-            fireball = Fireball(self.direction, self.rect.center)
-            group.add(fireball)
+            for i in range(self.skillPowerLvl):
+                fireball = Fireball(self.direction, [self.rect.center[0] + i * 10, self.rect.center[1]])
+                group.add(fireball)
+                self.musicManager.loadSound("fireball", 0.4)
             self.mana -= 10
-            self.musicManager.loadSound("fireball", 0.4)
 
     def useManaPotion(self):
         if self.mana == self.maxMana:
@@ -195,8 +256,8 @@ class Player(pygame.sprite.Sprite):
         display.blit(self.image, self.pos)
         self.healthBar.render(display)
 
-        pygame.draw.rect(display, (0, 0, 255), pygame.Rect(self.pos.x, self.rect.y - 50,
-                                                           100 * (self.mana / self.maxMana), 15))
+        pygame.draw.rect(display, (0, 0, 255), pygame.Rect(10, 70,
+                                                           self.mana, 15))
 
     def load_animations(self):
         self.animation_right = [pygame.image.load("Images/Player_Sprite_R.png").convert_alpha(),
