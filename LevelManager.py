@@ -25,7 +25,8 @@ class LevelManager:
         # Level 1
         L1 = Level()
         L1.addGround(Ground(900, 120, -20, 340, "Images/Ground.png"))
-        L1.addBuilding(Building(500, 120, "Images/Building01.png"))
+        # L1.addBuilding(Building(500, 120, "Images/Building01.png"))
+        L1.addBackGround("Images/GameOver.png")
         self.levels.append(L1)
 
 

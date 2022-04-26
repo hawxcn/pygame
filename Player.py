@@ -6,13 +6,13 @@ from Fireball import Fireball
 vec = pygame.math.Vector2
 
 
-
 class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y, musicManager):
+    def __init__(self, x, y, levelManager):
         super().__init__()
         self.image = pygame.image.load("Images/Player_Sprite_R.png")
         self.rect = pygame.Rect(x, y, 35, 50)
-        self.musicManager = musicManager
+        self.levelManager = levelManager
+        self.musicManager = levelManager.musicManager
 
         # Player Info
         self.pos = vec(x, y)
@@ -44,7 +44,6 @@ class Player(pygame.sprite.Sprite):
         # Player Events
         self.hit_cooldown_event = pygame.USEREVENT + 1
 
-        
     def move(self):
         self.acc = vec(0, 0.5)
 
@@ -64,14 +63,22 @@ class Player(pygame.sprite.Sprite):
         self.vel += self.acc
         self.pos += self.vel + 0.5 * self.acc
 
+        lvl = self.levelManager
         if self.pos.x > 800:
             self.pos.x = 0
+            if lvl.level == 0:
+                self.changeLevel(2)
         elif self.pos.x < -30:
             self.pos.x = 800
+            if lvl.level == 0:
+                self.changeLevel(2)
 
         self.rect.topleft = self.pos
         self.rect.x += 32
 
+    def changeLevel(self,n):
+        self.healthBar.reset()
+        self.levelManager.changeLevel(n)
 
     def walking(self):
         if self.move_frame > 6:
@@ -97,12 +104,12 @@ class Player(pygame.sprite.Sprite):
     def attack(self):
         if self.attacking == True:
             if self.direction == "RIGHT":
-                self.attack_range = pygame.Rect(self.rect.x + self.rect.width,self.pos.y, 30, self.rect.height)
+                self.attack_range = pygame.Rect(self.rect.x + self.rect.width, self.pos.y, 30, self.rect.height)
             elif self.direction == "LEFT":
                 self.attack_range = pygame.Rect(self.pos.x, self.pos.y, 30, self.rect.height)
 
             self.musicManager.loadSound("sword", 0.4)
-            
+
             if self.attack_frame > 6:
                 self.attack_frame = 0
                 self.attacking = False
@@ -118,7 +125,6 @@ class Player(pygame.sprite.Sprite):
             if self.attack_counter >= 3:
                 self.attack_frame += 1
                 self.attack_counter = 0
-        
 
     def update(self, group, enemyProjectiles):
         self.walking()
@@ -137,6 +143,8 @@ class Player(pygame.sprite.Sprite):
         if self.hit_cooldown == False:
             self.hit_cooldown = True
             self.healthBar.takeDamage(damage)
+            if(self.healthBar.health <=0):
+                self.changeLevel(1)
             pygame.time.set_timer(self.hit_cooldown_event, 1000)
 
     def fireball(self, group):
@@ -149,14 +157,13 @@ class Player(pygame.sprite.Sprite):
     def useManaPotion(self):
         if self.mana == self.maxMana:
             return
-        
+
         if self.manaPotions >= 1:
             self.manaPotions -= 1
             if self.mana + 50 > self.maxMana:
                 self.mana = self.maxMana
             else:
                 self.mana += 50
-
 
     def collision(self, group):
         hits = pygame.sprite.spritecollide(self, group, False)
@@ -167,10 +174,9 @@ class Player(pygame.sprite.Sprite):
 
                 if self.rect.bottom < lowest.rect.bottom:
                     self.pos.y = lowest.rect.top - self.rect.height
-                    self.rect.y = lowest.rect.top - self.rect.height 
+                    self.rect.y = lowest.rect.top - self.rect.height
                     self.vel.y = 0
                     self.jumping = False
-                    
 
     def jump(self):
         if self.jumping == False:
@@ -181,45 +187,45 @@ class Player(pygame.sprite.Sprite):
         if self.jumping:
             if self.vel.y < -3:
                 self.vel.y = -3
-        
+
     def render(self, display):
-        #pygame.draw.rect(display, (255, 0, 0), self.rect)
-        #pygame.draw.rect(display, (0, 255, 0), self.attack_range)
+        # pygame.draw.rect(display, (255, 0, 0), self.rect)
+        # pygame.draw.rect(display, (0, 255, 0), self.attack_range)
         display.blit(self.image, self.pos)
         self.healthBar.render(display)
 
-        pygame.draw.rect(display, (0,0,255), pygame.Rect(self.pos.x, self.rect.y - 50,
-                                                         100 * (self.mana/self.maxMana), 15))
+        pygame.draw.rect(display, (0, 0, 255), pygame.Rect(self.pos.x, self.rect.y - 50,
+                                                           100 * (self.mana / self.maxMana), 15))
 
     def load_animations(self):
         self.animation_right = [pygame.image.load("Images/Player_Sprite_R.png").convert_alpha(),
-                   pygame.image.load("Images/Player_Sprite2_R.png").convert_alpha(),
-                   pygame.image.load("Images/Player_Sprite3_R.png").convert_alpha(),
-                   pygame.image.load("Images/Player_Sprite4_R.png").convert_alpha(),
-                   pygame.image.load("Images/Player_Sprite5_R.png").convert_alpha(),
-                   pygame.image.load("Images/Player_Sprite6_R.png").convert_alpha(),
-                   pygame.image.load("Images/Player_Sprite_R.png").convert_alpha()]
+                                pygame.image.load("Images/Player_Sprite2_R.png").convert_alpha(),
+                                pygame.image.load("Images/Player_Sprite3_R.png").convert_alpha(),
+                                pygame.image.load("Images/Player_Sprite4_R.png").convert_alpha(),
+                                pygame.image.load("Images/Player_Sprite5_R.png").convert_alpha(),
+                                pygame.image.load("Images/Player_Sprite6_R.png").convert_alpha(),
+                                pygame.image.load("Images/Player_Sprite_R.png").convert_alpha()]
 
         self.animation_left = [pygame.image.load("Images/Player_Sprite_L.png").convert_alpha(),
-                          pygame.image.load("Images/Player_Sprite2_L.png").convert_alpha(),
-                          pygame.image.load("Images/Player_Sprite3_L.png").convert_alpha(),
-                          pygame.image.load("Images/Player_Sprite4_L.png").convert_alpha(),
-                          pygame.image.load("Images/Player_Sprite5_L.png").convert_alpha(),
-                          pygame.image.load("Images/Player_Sprite6_L.png").convert_alpha(),
-                          pygame.image.load("Images/Player_Sprite_L.png").convert_alpha()]
+                               pygame.image.load("Images/Player_Sprite2_L.png").convert_alpha(),
+                               pygame.image.load("Images/Player_Sprite3_L.png").convert_alpha(),
+                               pygame.image.load("Images/Player_Sprite4_L.png").convert_alpha(),
+                               pygame.image.load("Images/Player_Sprite5_L.png").convert_alpha(),
+                               pygame.image.load("Images/Player_Sprite6_L.png").convert_alpha(),
+                               pygame.image.load("Images/Player_Sprite_L.png").convert_alpha()]
 
         self.attack_animation_right = [pygame.image.load("Images/Player_Sprite_R.png").convert_alpha(),
-                                  pygame.image.load("Images/Player_Attack1_R.png").convert_alpha(),
-                                  pygame.image.load("Images/Player_Attack2_R.png").convert_alpha(),
-                                  pygame.image.load("Images/Player_Attack3_R.png").convert_alpha(),
-                                  pygame.image.load("Images/Player_Attack4_R.png").convert_alpha(),
-                                  pygame.image.load("Images/Player_Attack5_R.png").convert_alpha(),
-                                  pygame.image.load("Images/Player_Sprite_R.png").convert_alpha()]
+                                       pygame.image.load("Images/Player_Attack1_R.png").convert_alpha(),
+                                       pygame.image.load("Images/Player_Attack2_R.png").convert_alpha(),
+                                       pygame.image.load("Images/Player_Attack3_R.png").convert_alpha(),
+                                       pygame.image.load("Images/Player_Attack4_R.png").convert_alpha(),
+                                       pygame.image.load("Images/Player_Attack5_R.png").convert_alpha(),
+                                       pygame.image.load("Images/Player_Sprite_R.png").convert_alpha()]
 
         self.attack_animation_left = [pygame.image.load("Images/Player_Sprite_L.png").convert_alpha(),
-                                  pygame.image.load("Images/Player_Attack1_L.png").convert_alpha(),
-                                  pygame.image.load("Images/Player_Attack2_L.png").convert_alpha(),
-                                  pygame.image.load("Images/Player_Attack3_L.png").convert_alpha(),
-                                  pygame.image.load("Images/Player_Attack4_L.png").convert_alpha(),
-                                  pygame.image.load("Images/Player_Attack5_L.png").convert_alpha(),
-                                  pygame.image.load("Images/Player_Sprite_L.png").convert_alpha()]
+                                      pygame.image.load("Images/Player_Attack1_L.png").convert_alpha(),
+                                      pygame.image.load("Images/Player_Attack2_L.png").convert_alpha(),
+                                      pygame.image.load("Images/Player_Attack3_L.png").convert_alpha(),
+                                      pygame.image.load("Images/Player_Attack4_L.png").convert_alpha(),
+                                      pygame.image.load("Images/Player_Attack5_L.png").convert_alpha(),
+                                      pygame.image.load("Images/Player_Sprite_L.png").convert_alpha()]

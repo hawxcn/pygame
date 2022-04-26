@@ -11,25 +11,22 @@ from UserInterface import UserInterface
 from LevelManager import LevelManager
 from MusicManager import MusicManager
 
-
 # Begin Pygame
 pygame.init()
-
 
 WIDTH = 800
 HEIGHT = 400
 FPS = 60
 CLOCK = pygame.time.Clock()
 
-
 display = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Pygame RPG")
 
 background = pygame.image.load("Images/Background.png")
 
-
 musicManager = MusicManager()
-player = Player(200, 200, musicManager)
+levelManager = LevelManager(musicManager)
+player = Player(200, 200, levelManager)
 player.load_animations()
 UI = UserInterface(player)
 
@@ -39,10 +36,7 @@ EnemyProjectiles = pygame.sprite.Group()
 playerGroup = pygame.sprite.Group()
 playerGroup.add(player)
 
-levelManager = LevelManager(musicManager)
-
 musicManager.loadMusic("background", 0.3)
-
 
 while 1:
     for event in pygame.event.get():
@@ -62,11 +56,10 @@ while 1:
                 enemy = Enemy()
             elif choice == 1:
                 enemy = RangedEnemy(EnemyProjectiles)
-                
+
             levelManager.enemyGroup.add(enemy)
             levelManager.generatedEnemies += 1
 
-            
         if event.type == MOUSEBUTTONDOWN:
             pass
 
@@ -95,25 +88,28 @@ while 1:
             if event.key == K_SPACE:
                 player.jump_cancel()
 
-
     # Update Functions
     for enemy in levelManager.enemyGroup:
-        enemy.update(levelManager.levels[levelManager.getLevel()].groundData,player,PlayerProjectiles,Items)
-        
+        enemy.update(levelManager.levels[levelManager.getLevel()].groundData, player, PlayerProjectiles, Items)
+
     player.update(levelManager.levels[levelManager.getLevel()].groundData, EnemyProjectiles)
     UI.update(CLOCK.get_fps())
-    
+
     levelManager.update()
 
     # Render Functions
-    display.blit(background, (0, 0))
+    newBg = levelManager.levels[levelManager.getLevel()].backgroundData
+    if newBg is not None:
+        display.blit(newBg, (0, 0))
+    else:
+        display.blit(background, (0, 0))
 
     for data in levelManager.levels[levelManager.getLevel()].data:
         data.render(display)
 
     for enemy in levelManager.enemyGroup:
         enemy.render(display)
-    
+
     for item in Items:
         item.render(display)
         item.update(player)
@@ -125,24 +121,9 @@ while 1:
     for projectile in EnemyProjectiles:
         projectile.render(display)
         projectile.update(playerGroup)
-        
+
     player.render(display)
     UI.render(display)
 
-
     pygame.display.update()
     CLOCK.tick(FPS)
-            
-
-
-
-
-
-
-
-
-
-
-
-    
-    
