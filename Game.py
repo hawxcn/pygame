@@ -20,7 +20,7 @@ FPS = 60
 CLOCK = pygame.time.Clock()
 
 display = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Pygame RPG")
+pygame.display.set_caption("Bugs Free")
 
 background = pygame.image.load("Images/Background.png")
 
